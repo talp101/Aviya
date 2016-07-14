@@ -21,12 +21,7 @@ export default class Aviya {
         return this.htmlFile.match(re).map(htmlMatch => htmlMatch.replace(/(\\r\\n|\\n|\\r|\\")/gm,'')).join('')
     }
 
-    render(element=this.constructor.name){
-        this._htmlString = this.htmlFile ? this._htmlFileRender() : this.html();
-        for (let selectedElement of document.querySelectorAll(element)){
-            selectedElement.insertAdjacentHTML('afterend', this._htmlString);
-            selectedElement.remove()
-        }
+    _attachEventsToDom(){
         for (let event of this._events){
             for (let registerEvent of document.querySelectorAll(event.selector)){
                 if (!registerEvent.getAttribute('event_id')){
@@ -37,6 +32,9 @@ export default class Aviya {
                 }
             }
         }
+    }
+
+    _renderDependencies(){
         for (let dependency of this._dependencies){
             if (typeof dependency === 'function'){
                 let dumbComponent = new Aviya();
@@ -48,4 +46,15 @@ export default class Aviya {
             else dependency.render();
         }
     }
+    }
+
+    render(element=this.constructor.name){
+        this._htmlString = this.htmlFile ? this._htmlFileRender() : this.html();
+        for (let selectedElement of document.querySelectorAll(element)){
+            selectedElement.insertAdjacentHTML('afterend', this._htmlString);
+            selectedElement.remove()
+        }
+        this._attachEventsToDom();
+        this._renderDependencies();
+
 }
